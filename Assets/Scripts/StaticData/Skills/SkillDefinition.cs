@@ -8,5 +8,6 @@ namespace SkillTree.StaticData.Skills
         public Guid Id;
         public string Name;
         public Vector2 Position;
+        public int EarnCost;
     }
 }
