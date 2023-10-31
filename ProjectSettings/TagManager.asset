@@ -38,6 +38,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Connections
+    uniqueID: 1320153147
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
