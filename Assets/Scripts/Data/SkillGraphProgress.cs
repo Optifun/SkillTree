@@ -23,6 +23,7 @@ namespace SkillTree.Data
                 target.AddConnection(source);
             }
             GraphRoot = Get(skillGraph.BaseSkill);
+            GraphRoot.SetEarned(true);
         }
 
         public void EarnSkill(Guid skillId)

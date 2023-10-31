@@ -23,5 +23,10 @@ namespace SkillTree.Utils
         {
             return new System.Numerics.Vector2(v.X, v.Y);
         }
+
+        public static System.Numerics.Vector3 ToVector3(this System.Numerics.Vector2 v)
+        {
+            return new System.Numerics.Vector3(v.X, v.Y, 0);
+        }
     }
 }

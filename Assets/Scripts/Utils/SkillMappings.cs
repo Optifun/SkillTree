@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using SkillTree.SkillEditing.Skills;
+using SkillTree.SkillEditing;
 using SkillTree.StaticData.Skills;
 
 namespace SkillTree.Utils

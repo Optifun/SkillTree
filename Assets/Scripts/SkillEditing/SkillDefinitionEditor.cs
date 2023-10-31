@@ -2,14 +2,15 @@
 using SkillTree.View;
 using UnityEngine;
 
-namespace SkillTree.SkillEditing.Skills
+namespace SkillTree.SkillEditing
 {
     [ExecuteInEditMode]
     public class SkillDefinitionEditor : MonoBehaviour
     {
         public event EventHandler<SkillDefinitionEditor> Deleted;
-        public string Name;
+
         public Guid Id => Guid.Parse(_id);
+        public string Name;
         [SerializeField] private string _id;
         private SkillView _skillView;
 

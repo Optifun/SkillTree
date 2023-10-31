@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
+using SkillTree.Services;
 using SkillTree.StaticData.Skills;
 using SkillTree.Utils;
 using SkillTree.View;
@@ -8,22 +8,25 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
-namespace SkillTree.SkillEditing.Skills
+namespace SkillTree.SkillEditing
 {
     [ExecuteInEditMode]
     public class SkillGraphEditor : MonoBehaviour
     {
-        private const string FileExtension = ".asset";
-        private const string PathToData = "Assets/Configs/SkillTree/";
+        public const string FileExtension = ".asset";
+        public const string PathToData = "Assets/Configs/SkillTree/";
 
         public string TreeName;
         public SkillDefinitionEditor BaseSkill;
         public List<SkillDefinitionEditor> Skills;
         public List<SkillConnectionEditor> Connections;
+
+        [Header("Miscellaneous")]
         public SkillView SkillPrefab;
         public SkillConnectionView ConnectionPrefab;
         [SerializeField] private Transform _nodesContainer;
         [SerializeField] private Transform _connectionContainer;
+        private readonly SkillGraphExporter _skillGraphExporter = new();
 
 
         private void OnEnable()
@@ -60,27 +63,16 @@ namespace SkillTree.SkillEditing.Skills
         public void Export()
         {
             SkillGraph graph = this.ToDTO();
-            string path = Path.Combine(PathToData, $"{TreeName}{FileExtension}");
-            TextAsset asset = new TextAsset(JsonConvert.SerializeObject(graph, Formatting.Indented));
-            if (File.Exists(path))
-            {
-                AssetDatabase.DeleteAsset(path);
-            }
-            AssetDatabase.CreateAsset(asset, path);
+            string path = EditorUtility.SaveFilePanel("Save file", PathToData, graph.Name, FileExtension);
 
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            _skillGraphExporter.SaveGraph(graph, path);
         }
 
         [ContextMenu(nameof(Load))]
         public void Load()
         {
-            string path = EditorUtility.SaveFilePanel(title: "Choose file", 
-                    directory: "skills", 
-                    defaultName: TreeName + FileExtension, 
-                    extension: FileExtension);
-            string json = AssetDatabase.LoadAssetAtPath<TextAsset>(path).text;
-            SkillGraph skillGraph = JsonConvert.DeserializeObject<SkillGraph>(json);
+            string path = EditorUtility.OpenFilePanel("Choose file", "skills", FileExtension);
+            SkillGraph skillGraph = _skillGraphExporter.LoadGraph(path);
             InitializeEditor(skillGraph);
         }
 

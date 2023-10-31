@@ -2,12 +2,13 @@
 using SkillTree.View;
 using UnityEngine;
 
-namespace SkillTree.SkillEditing.Skills
+namespace SkillTree.SkillEditing
 {
     [ExecuteInEditMode]
     public class SkillConnectionEditor : MonoBehaviour
     {
         public event EventHandler<SkillConnectionEditor> Deleted; 
+
         public SkillDefinitionEditor Source;
         public SkillDefinitionEditor Target;
         [SerializeField] private SkillConnectionView _view;
