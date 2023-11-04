@@ -1,4 +1,6 @@
-﻿using SkillTree.UI.Core;
+﻿using System;
+using SkillTree.Data;
+using SkillTree.UI.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,10 +22,31 @@ namespace SkillTree.UI.Screens
             _acclaimButton.onClick.AddListener(Presenter.AcclaimSelectedSkill);
             _forgetButton.onClick.AddListener(Presenter.ForgetSelectedSkill);
             _forgetAllButton.onClick.AddListener(Presenter.ForgetAllSkills);
+            Presenter.SelectedSkillChanged += OnSelectedSkillChanged;
+            Presenter.ExperienceChanged += OnExperienceChanged; 
         }
 
         protected override void OnScreenHidden()
         {
+            _earnButton.onClick.RemoveListener(Presenter.EarnXPPoints);
+            _acclaimButton.onClick.RemoveListener(Presenter.AcclaimSelectedSkill);
+            _forgetButton.onClick.RemoveListener(Presenter.ForgetSelectedSkill);
+            _forgetAllButton.onClick.RemoveListener(Presenter.ForgetAllSkills);
+            Presenter.SelectedSkillChanged -= OnSelectedSkillChanged;
+            Presenter.ExperienceChanged -= OnExperienceChanged; 
+        }
+
+        private void OnSelectedSkillChanged(Guid skillId)
+        {
+            ISkill skill = Presenter.GetSkill(skillId);
+            _skillCostText.text = skill.Data.EarnCost.ToString();
+            _acclaimButton.interactable = Presenter.CanAcclaimSkill(skillId);
+            _forgetButton.interactable = Presenter.CanForgetSkill(skillId);
+        }
+
+        private void OnExperienceChanged(int experiencePoints)
+        {
+            _experiencePointsText.text = experiencePoints.ToString();
         }
     }
 }

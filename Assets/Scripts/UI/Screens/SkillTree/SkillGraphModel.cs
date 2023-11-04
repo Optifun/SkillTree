@@ -8,7 +8,9 @@ namespace SkillTree.UI.Screens
     public class SkillGraphModel
     {
         public event Action<Guid> SelectedSkillChanged;
+        public event Action<int> ExperienceChanged;
         public Guid SelectedSkill { get; private set; }
+        public ExperienceState ExperienceState => _gameState.Experience;
         private readonly GameState _gameState;
         private readonly SkillGraphProgress _skillGraphProgress;
 
@@ -56,6 +58,12 @@ namespace SkillTree.UI.Screens
             _skillGraphProgress.ForgetAll();
         }
 
+
+        public bool CanAcclaimSkill(Guid skillId)
+        {
+            return CanAcclaimSkill(_skillGraphProgress.Get(skillId));
+        }
+
         public bool CanAcclaimSkill(SkillNode node)
         {
             SkillNode skillNode = node;
@@ -68,12 +76,22 @@ namespace SkillTree.UI.Screens
         {
             if (e.Earned)
             {
-                _gameState.Experience.Add(-e.SkillNode.Data.EarnCost);
+                _gameState.Experience.Add(-e.Skill.Data.EarnCost);
             }
             else
             {
-                _gameState.Experience.Add(e.SkillNode.Data.EarnCost);
+                _gameState.Experience.Add(e.Skill.Data.EarnCost);
             }
+        }
+
+        public ISkill GetSkill(Guid skillId)
+        {
+            return _skillGraphProgress.Get(skillId);
+        }
+
+        public bool CanForgetSkill(Guid skillId)
+        {
+            return _skillGraphProgress.CanForget(skillId);
         }
     }
 }

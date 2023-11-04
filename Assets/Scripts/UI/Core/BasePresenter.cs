@@ -3,7 +3,7 @@
     public abstract class BasePresenter : IScreenPresenter
     {
 
-        public void Initialize()
+        public virtual void Initialize()
         {
             
         }

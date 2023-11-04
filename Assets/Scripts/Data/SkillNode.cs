@@ -5,7 +5,7 @@ using SkillTree.StaticData.Skills;
 
 namespace SkillTree.Data
 {
-    public class SkillNode
+    public class SkillNode : ISkill
     {
         public event EventHandler<SkillNodeStateChangedArgs> StateChanged;
         public Guid Id => Data.Id;
@@ -40,7 +40,7 @@ namespace SkillTree.Data
 
         private void InvokeStateChanged()
         {
-            StateChanged?.Invoke(this, new SkillNodeStateChangedArgs(){SkillNode = this, Earned = Earned});
+            StateChanged?.Invoke(this, new SkillNodeStateChangedArgs(){Skill = this, Earned = Earned});
         }
     }
 }

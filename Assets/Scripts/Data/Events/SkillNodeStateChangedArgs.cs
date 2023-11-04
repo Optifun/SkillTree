@@ -4,7 +4,7 @@ namespace SkillTree.Data.Events
 {
     public class SkillNodeStateChangedArgs : EventArgs
     {
-        public SkillNode SkillNode;
+        public ISkill Skill;
         public bool Earned;
     }
 }

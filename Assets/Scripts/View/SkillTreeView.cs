@@ -17,10 +17,12 @@ namespace SkillTree.View
         private readonly List<SkillView> _skillViews = new();
         private readonly List<SkillConnectionView> _skillConnectionViews = new();
         private SkillGraphModel _model;
+        private Guid _lastSelectedSkill;
 
         public void Construct(SkillGraphModel model)
         {
             _model = model;
+            _model.SelectedSkillChanged += OnSelectedSkillChanged;
         }
 
         public void DisplayTree(SkillGraphProgress graph)
@@ -32,7 +34,8 @@ namespace SkillTree.View
                 SkillView skillView = Instantiate(_viewPrefab, position, Quaternion.identity, transform);
                 skillView.SetId(skill.Data.Id);
                 skillView.SetName(skill.Data.Name);
-                skillView.SetState(skill.Earned);
+                skillView.SetEarned(skill.Earned);
+                skillView.SetSelected(false);
                 skillView.Clicked += OnSkillClicked;
                 CreateConnections(skill, connections);
                 _skillViews.Add(skillView);
@@ -69,9 +72,28 @@ namespace SkillTree.View
 
         private void OnSkillStateChanged(object sender, SkillNodeStateChangedArgs e)
         {
-            SkillNode node = e.SkillNode;
-            SkillView view = _skillViews.First(view => view.Id == node.Id);
-            view.SetState(e.Earned);
+            ISkill node = e.Skill;
+            Guid skillId = node.Id;
+            SkillView view = GetSkillView(skillId);
+            view.SetEarned(e.Earned);
+        }
+
+        private void OnSelectedSkillChanged(Guid skillId)
+        {
+            if (_lastSelectedSkill != default)
+            {
+                GetSkillView(_lastSelectedSkill).SetSelected(false);
+            }
+            if (_lastSelectedSkill != skillId)
+            {
+                _lastSelectedSkill = skillId;
+                GetSkillView(_lastSelectedSkill).SetSelected(true);
+            }
+        }
+
+        private SkillView GetSkillView(Guid skillId)
+        {
+            return _skillViews.First(view1 => view1.Id == skillId);
         }
     }
 }

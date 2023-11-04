@@ -13,9 +13,12 @@ namespace SkillTree.Infrastructure
         [SerializeField] private TextAsset _skillTreeAsset;
         [SerializeField] private SkillTreeView _skillTreeViewPrefab;
         [SerializeField] private Canvas _rootCanvas;
+        [SerializeField] private SkillGraphScreen _skillGraphScreenPrefab;
+
+        private SkillTreeView _skillTreeView;
+        private SkillGraphScreen _skillGraphScreen;
 
         private SkillGraphExporter _skillGraphExporter;
-        private SkillTreeView _skillTreeView;
         private SkillGraphProgress _skillGraphProgress;
         private SkillGraphModel _skillGraphModel;
         private GameState _gameState;
@@ -30,11 +33,17 @@ namespace SkillTree.Infrastructure
 
             _skillTreeView = Instantiate(_skillTreeViewPrefab, transform);
             _skillTreeView.Construct(_skillGraphModel);
+
+            _skillGraphScreen = Instantiate(_skillGraphScreenPrefab, _rootCanvas.transform);
+            SkillGraphPresenter presenter = new SkillGraphPresenter(_skillGraphModel);
+            presenter.Initialize();
+            _skillGraphScreen.Construct(presenter);
         }
 
         private void Start()
         {
             _skillTreeView.DisplayTree(_skillGraphProgress);
+            _skillGraphScreen.ShowScreen();
         }
     }
 }

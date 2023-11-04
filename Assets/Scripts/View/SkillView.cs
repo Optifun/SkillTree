@@ -14,7 +14,11 @@ namespace SkillTree.View
         [SerializeField] private Image _skillSkin;
         [SerializeField] private TMP_Text _skillNameLabel;
         [SerializeField] private Color _normalColor;
-        [SerializeField] private Color _unlockedColor;
+        [SerializeField] private Color _selectedColor;
+        [SerializeField] private Color _earnedColor;
+        [SerializeField] private Color _earnedSelectedColor;
+        private bool _earned;
+        private bool _selected;
 
         public void SetId(Guid skillId)
         {
@@ -26,14 +30,39 @@ namespace SkillTree.View
             _skillNameLabel.text = skillName;
         }
 
-        public void SetState(bool unlocked)
+        public void SetEarned(bool value)
         {
-            _skillSkin.color = unlocked ? _unlockedColor : _normalColor;
+            _earned = value;
+            RedrawSkin();
+        }
+
+        public void SetSelected(bool selected)
+        {
+            _selected = selected;
+            RedrawSkin();
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
             Clicked?.Invoke(this, Id);
+        }
+
+        private void RedrawSkin()
+        {
+            Color color = _normalColor;
+            if (_selected && _earned)
+            {
+                color = _earnedSelectedColor;
+            }
+            else if (_selected)
+            {
+                color = _selectedColor;
+            }
+            else if (_earned)
+            {
+                color = _earnedColor;
+            }
+            _skillSkin.color = color;
         }
     }
 }

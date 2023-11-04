@@ -372,9 +372,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _skillSkin: {fileID: 45315190998907672}
   _skillNameLabel: {fileID: 45315191203417638}
-  _clickArea: {fileID: 0}
   _normalColor: {r: 1, g: 1, b: 1, a: 1}
-  _unlockedColor: {r: 0.02441454, g: 1, b: 0, a: 1}
+  _selectedColor: {r: 0.20754717, g: 0.8301887, b: 0.70989263, a: 1}
+  _earnedColor: {r: 0.5500564, g: 0.98039216, b: 0.3921569, a: 1}
+  _earnedSelectedColor: {r: 0, g: 0.9137255, b: 0.5325067, a: 1}
 --- !u!61 &3572309502713700245
 BoxCollider2D:
   m_ObjectHideFlags: 0
