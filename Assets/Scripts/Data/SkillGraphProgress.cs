@@ -112,7 +112,7 @@ namespace SkillTree.Data
                 return false;
             }
             nodes.Add(source);
-            if (predicate(source))
+            if (false == predicate(source))
             {
                 return false;
             }
