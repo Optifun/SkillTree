@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using SkillTree.Data;
 using SkillTree.UI.Core;
 
@@ -8,6 +9,8 @@ namespace SkillTree.UI.Screens
     {
         public event Action<int> ExperienceChanged;
         public event Action<Guid> SelectedSkillChanged;
+        public IEnumerable<ISkill> Skills => _model.Skills;
+        public Guid SelectedSkill => _model.SelectedSkill;
         private readonly SkillGraphModel _model;
 
         public SkillGraphPresenter(SkillGraphModel model)
@@ -47,6 +50,26 @@ namespace SkillTree.UI.Screens
             _model.ForgetAllSkills();
         }
 
+        public ISkill GetSkill(Guid skillId)
+        {
+            return _model.GetSkill(skillId);
+        }
+
+        public bool CanAcclaimSkill(Guid skillId)
+        {
+            return _model.CanAcclaimSkill(skillId);
+        }
+
+        public bool CanForgetSkill(Guid skillId)
+        {
+            return _model.CanForgetSkill(skillId);
+        }
+
+        public void SelectSkill(Guid skillId)
+        {
+            _model.SetSelection(skillId);
+        }
+
         private void Subscribe()
         {
             _model.SelectedSkillChanged += OnSelectedSkillChanged;
@@ -67,21 +90,6 @@ namespace SkillTree.UI.Screens
         private void OnExperienceChanged(int xp)
         {
             ExperienceChanged?.Invoke(xp);
-        }
-
-        public ISkill GetSkill(Guid skillId)
-        {
-            return _model.GetSkill(skillId);
-        }
-
-        public bool CanAcclaimSkill(Guid skillId)
-        {
-            return _model.CanAcclaimSkill(skillId);
-        }
-
-        public bool CanForgetSkill(Guid skillId)
-        {
-            return _model.CanForgetSkill(skillId);
         }
     }
 }

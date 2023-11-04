@@ -56,19 +56,19 @@ namespace SkillTree.Data
 
         public void ForgetAll()
         {
-            List<SkillNode> visited = new(); // can be pooled
-            Stack<SkillNode> stack = new();  // can be pooled
+            List<ISkill> visited = new(); // can be pooled
+            Stack<ISkill> stack = new();  // can be pooled
             stack.Push(GraphRoot);
 
-            while (stack.TryPop(out SkillNode source))
+            while (stack.TryPop(out ISkill source))
             {
                 visited.Add(source);
-                if (source != GraphRoot && source.Earned)
+                if (source != GraphRoot && source.Earned && source is SkillNode skillNode)
                 {
-                    source.SetEarned(false);
+                    skillNode.SetEarned(false);
                 }
 
-                foreach (SkillNode node in source.Nodes)
+                foreach (ISkill node in source.Nodes)
                 {
                     if (false == visited.Contains(node))
                     {
@@ -103,13 +103,13 @@ namespace SkillTree.Data
             return CanForget(Get(skillId));
         }
 
-        public bool CanForget(SkillNode node)
+        public bool CanForget(ISkill node)
         {
             if (node == GraphRoot || false == node.Earned)
             {
                 return false;
             }
-            IEnumerable<SkillNode> earnedPeers = node.Nodes.Where(n => n.Earned);
+            IEnumerable<ISkill> earnedPeers = node.Nodes.Where(n => n.Earned);
             foreach (var peer in earnedPeers)
             {
                 if (false == CanReachFrom(peer, GraphRoot, n => n.Earned && n != node))
@@ -120,20 +120,20 @@ namespace SkillTree.Data
             return true;
         }
 
-        private static bool CanReachFrom(SkillNode source, SkillNode destination, Func<SkillNode, bool> predicate)
+        private static bool CanReachFrom(ISkill source, ISkill destination, Func<ISkill, bool> predicate)
         {
-            List<SkillNode> visited = new(); // can be pooled
-            Stack<SkillNode> stack = new();  // can be pooled
+            List<ISkill> visited = new(); // can be pooled
+            Stack<ISkill> stack = new();  // can be pooled
             stack.Push(source);
 
-            while (stack.TryPop(out SkillNode node))
+            while (stack.TryPop(out ISkill node))
             {
                 visited.Add(node);
                 if (node == destination)
                 {
                     return true;
                 }
-                foreach (SkillNode peer in node.Nodes)
+                foreach (ISkill peer in node.Nodes)
                 {
                     if (false == visited.Contains(peer) && predicate(peer))
                     {

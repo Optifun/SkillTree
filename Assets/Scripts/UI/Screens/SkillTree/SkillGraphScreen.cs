@@ -1,6 +1,7 @@
 ﻿using System;
 using SkillTree.Data;
 using SkillTree.UI.Core;
+using SkillTree.View;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,8 +17,26 @@ namespace SkillTree.UI.Screens
         [SerializeField] private Button _forgetButton;
         [SerializeField] private Button _forgetAllButton;
         private Guid _lastSelectedId;
+        private SkillTreeView _skillTreeView;
+
+        public void Initialize(SkillTreeView skillTreeView)
+        {
+            _skillTreeView = skillTreeView;
+        }
 
         protected override void OnScreenShown()
+        {
+            Subscribe();
+            RedrawButtons(_lastSelectedId);
+            _skillTreeView.DisplayTree(Presenter.Skills);
+        }
+
+        protected override void OnScreenHidden()
+        {
+            Unsubscribe();
+        }
+
+        private void Subscribe()
         {
             _earnButton.onClick.AddListener(Presenter.EarnXPPoints);
             _acclaimButton.onClick.AddListener(Presenter.AcclaimSelectedSkill);
@@ -25,29 +44,34 @@ namespace SkillTree.UI.Screens
             _forgetAllButton.onClick.AddListener(Presenter.ForgetAllSkills);
             Presenter.SelectedSkillChanged += OnSelectedSkillChanged;
             Presenter.ExperienceChanged += OnExperienceChanged;
-            RedrawButtons(_lastSelectedId);
+            _skillTreeView.SkillClicked += OnSkillClicked;
         }
 
-        protected override void OnScreenHidden()
+        private void Unsubscribe()
         {
             _earnButton.onClick.RemoveListener(Presenter.EarnXPPoints);
             _acclaimButton.onClick.RemoveListener(Presenter.AcclaimSelectedSkill);
             _forgetButton.onClick.RemoveListener(Presenter.ForgetSelectedSkill);
             _forgetAllButton.onClick.RemoveListener(Presenter.ForgetAllSkills);
             Presenter.SelectedSkillChanged -= OnSelectedSkillChanged;
-            Presenter.ExperienceChanged -= OnExperienceChanged; 
+            Presenter.ExperienceChanged -= OnExperienceChanged;
+        }
+
+        private void OnSkillClicked(object sender, Guid skillId)
+        {
+            Presenter.SelectSkill(skillId);
         }
 
         private void OnSelectedSkillChanged(Guid skillId)
         {
-            _lastSelectedId = skillId;
             RedrawButtons(skillId);
+            _skillTreeView.SelectSkill(skillId);
         }
 
         private void OnExperienceChanged(int experiencePoints)
         {
             _experiencePointsText.text = experiencePoints.ToString();
-            RedrawButtons(_lastSelectedId);
+            RedrawButtons(Presenter.SelectedSkill);
         }
 
         private void RedrawButtons(Guid skillId)

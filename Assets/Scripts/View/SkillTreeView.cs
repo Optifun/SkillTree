@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using SkillTree.Data;
 using SkillTree.Data.Events;
-using SkillTree.UI.Screens;
 using SkillTree.Utils;
 using UnityEngine;
 
@@ -11,24 +10,18 @@ namespace SkillTree.View
 {
     public class SkillTreeView : MonoBehaviour
     {
+        public event EventHandler<Guid> SkillClicked;
         [SerializeField] private SkillView _viewPrefab;
         [SerializeField] private SkillConnectionView _connectionPrefab;
 
         private readonly List<SkillView> _skillViews = new();
         private readonly List<SkillConnectionView> _skillConnectionViews = new();
-        private SkillGraphModel _model;
         private Guid _lastSelectedSkill;
 
-        public void Construct(SkillGraphModel model)
-        {
-            _model = model;
-            _model.SelectedSkillChanged += OnSelectedSkillChanged;
-        }
-
-        public void DisplayTree(SkillGraphProgress graph)
+        public void DisplayTree(IEnumerable<ISkill> nodes)
         {
             List<(Guid, Guid)> connections = new();
-            foreach (SkillNode skill in graph.Nodes)
+            foreach (ISkill skill in nodes)
             {
                 Vector3 position = skill.Data.Position.ToVector3().ConvertToUnityVector();
                 SkillView skillView = Instantiate(_viewPrefab, position, Quaternion.identity, transform);
@@ -43,15 +36,15 @@ namespace SkillTree.View
             }
         }
 
-        private void CreateConnections(SkillNode skill, List<(Guid, Guid)> connections)
+        private void CreateConnections(ISkill skill, List<(Guid, Guid)> connections)
         {
-            foreach (SkillNode peer in skill.Nodes)
+            foreach (ISkill peer in skill.Nodes)
             {
                 if (connections.Exists(pair =>
                     {
                         (Guid n1, Guid n2) = pair;
-                        return (skill.Id == n1 && peer.Id == n2)
-                                || (skill.Id == n2 && peer.Id == n1);
+                        return (skill.Id == n1 && peer.Id == n2) ||
+                                (skill.Id == n2 && peer.Id == n1);
                     }))
                 {
                     continue;
@@ -67,7 +60,7 @@ namespace SkillTree.View
 
         private void OnSkillClicked(object sender, Guid id)
         {
-            _model.SetSelection(id);
+            SkillClicked?.Invoke(this, id);
         }
 
         private void OnSkillStateChanged(object sender, SkillNodeStateChangedArgs e)
@@ -78,7 +71,7 @@ namespace SkillTree.View
             view.SetEarned(e.Earned);
         }
 
-        private void OnSelectedSkillChanged(Guid skillId)
+        public void SelectSkill(Guid skillId)
         {
             if (_lastSelectedSkill != default)
             {

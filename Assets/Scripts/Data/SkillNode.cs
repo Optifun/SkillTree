@@ -9,9 +9,10 @@ namespace SkillTree.Data
     {
         public event EventHandler<SkillNodeStateChangedArgs> StateChanged;
         public Guid Id => Data.Id;
-        public List<SkillNode> Nodes { get; } = new();
+        public IEnumerable<ISkill> Nodes => _nodes;
         public bool Earned { get; private set; }
         public SkillDefinition Data { get; }
+        private readonly List<SkillNode> _nodes = new();
 
         public SkillNode(SkillDefinition data, bool earned = false)
         {
@@ -30,17 +31,17 @@ namespace SkillTree.Data
 
         public void AddConnection(SkillNode node)
         {
-            Nodes.Add(node);
+            _nodes.Add(node);
         }
 
         public void RemoveConnection(SkillNode node)
         {
-            Nodes.Remove(node);
+            _nodes.Remove(node);
         }
 
         private void InvokeStateChanged()
         {
-            StateChanged?.Invoke(this, new SkillNodeStateChangedArgs(){Skill = this, Earned = Earned});
+            StateChanged?.Invoke(this, new SkillNodeStateChangedArgs() {Skill = this, Earned = Earned});
         }
     }
 }

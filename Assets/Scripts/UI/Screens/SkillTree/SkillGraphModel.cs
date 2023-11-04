@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using SkillTree.Data;
 using SkillTree.Data.Events;
 using SkillTree.Settings;
@@ -10,6 +11,7 @@ namespace SkillTree.UI.Screens
         public event Action<Guid> SelectedSkillChanged;
         public Guid SelectedSkill { get; private set; }
         public ExperienceState ExperienceState => _gameState.Experience;
+        public IEnumerable<ISkill> Skills => _skillGraphProgress.Nodes;
         private readonly GameState _gameState;
         private readonly SkillGraphProgress _skillGraphProgress;
 

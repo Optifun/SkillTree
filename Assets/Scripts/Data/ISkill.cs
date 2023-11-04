@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using SkillTree.Data.Events;
 using SkillTree.StaticData.Skills;
 
@@ -10,5 +11,6 @@ namespace SkillTree.Data
         Guid Id { get; }
         bool Earned { get; }
         SkillDefinition Data { get; }
+        IEnumerable<ISkill> Nodes { get; }
     }
 }

@@ -32,17 +32,15 @@ namespace SkillTree.Infrastructure
             _skillGraphModel = new SkillGraphModel(_gameState, _skillGraphProgress);
 
             _skillTreeView = Instantiate(_skillTreeViewPrefab, transform);
-            _skillTreeView.Construct(_skillGraphModel);
-
             _skillGraphScreen = Instantiate(_skillGraphScreenPrefab, _rootCanvas.transform);
             SkillGraphPresenter presenter = new SkillGraphPresenter(_skillGraphModel);
             presenter.Initialize();
             _skillGraphScreen.Construct(presenter);
+            _skillGraphScreen.Initialize(_skillTreeView);
         }
 
         private void Start()
         {
-            _skillTreeView.DisplayTree(_skillGraphProgress);
             _skillGraphScreen.ShowScreen();
         }
     }
