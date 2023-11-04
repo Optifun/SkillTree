@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using SkillTree.Data.Events;
 using SkillTree.StaticData.Skills;
 
 namespace SkillTree.Data
 {
     public class SkillNode
     {
-        public event EventHandler<bool> EarnedChanged;
+        public event EventHandler<SkillNodeStateChangedArgs> StateChanged;
         public Guid Id => Data.Id;
         public List<SkillNode> Nodes { get; } = new();
         public bool Earned { get; private set; }
@@ -23,7 +24,7 @@ namespace SkillTree.Data
             if (Earned != value)
             {
                 Earned = value;
-                EarnedChanged?.Invoke(this, value);
+                InvokeStateChanged();
             }
         }
 
@@ -35,6 +36,11 @@ namespace SkillTree.Data
         public void RemoveConnection(SkillNode node)
         {
             Nodes.Remove(node);
+        }
+
+        private void InvokeStateChanged()
+        {
+            StateChanged?.Invoke(this, new SkillNodeStateChangedArgs(){SkillNode = this, Earned = Earned});
         }
     }
 }

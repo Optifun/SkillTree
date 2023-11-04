@@ -18,13 +18,15 @@ namespace SkillTree.Infrastructure
         private SkillTreeView _skillTreeView;
         private SkillGraphProgress _skillGraphProgress;
         private SkillGraphModel _skillGraphModel;
+        private GameState _gameState;
 
         private void Awake()
         {
             _skillGraphExporter = new SkillGraphExporter();
             SkillGraph skillGraph = JsonConvert.DeserializeObject<SkillGraph>(_skillTreeAsset.text);
             _skillGraphProgress = new SkillGraphProgress(skillGraph);
-            _skillGraphModel = new SkillGraphModel(new GameState());
+            _gameState = new GameState();
+            _skillGraphModel = new SkillGraphModel(_gameState, _skillGraphProgress);
 
             _skillTreeView = Instantiate(_skillTreeViewPrefab, transform);
             _skillTreeView.Construct(_skillGraphModel);

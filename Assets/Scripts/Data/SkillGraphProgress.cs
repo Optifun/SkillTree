@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SkillTree.Data.Events;
 using SkillTree.StaticData.Skills;
-using UnityEngine;
 
 namespace SkillTree.Data
 {
-    public class SkillGraphProgress
+    public class SkillGraphProgress : IDisposable
     {
-        public readonly SkillNode GraphRoot;
+        public event EventHandler<SkillNodeStateChangedArgs> SkillStateChanged;
         public IReadOnlyList<SkillNode> Nodes => _nodes;
+        public readonly SkillNode GraphRoot;
         private readonly SkillNode[] _nodes;
 
         public SkillGraphProgress(SkillGraph skillGraph)
         {
-            _nodes = skillGraph.Skills.Select(s => new SkillNode(s)).ToArray();
+            _nodes = skillGraph.Skills.Select(s =>
+            {
+                SkillNode skillNode = new SkillNode(s);
+                skillNode.StateChanged += OnSkillStateChanged;
+                return skillNode;
+            }).ToArray();
             foreach (SkillConnection connection in skillGraph.Connections)
             {
                 SkillNode source = Get(connection.Source);
@@ -26,12 +32,46 @@ namespace SkillTree.Data
             GraphRoot.SetEarned(true);
         }
 
-        public void EarnSkill(Guid skillId)
+        public bool TryEarnSkill(Guid skillId)
         {
             SkillNode node = Get(skillId);
-            if (CanEarn(node))
+            if (false == CanEarn(node))
             {
-                node.SetEarned(true);
+                return false;
+            }
+            node.SetEarned(true);
+            return true;
+        }
+
+        public bool TryForgetSkill(Guid skillId)
+        {
+            SkillNode node = Get(skillId);
+            if (false == CanForget(node))
+            {
+                return false;
+            }
+            node.SetEarned(false);
+            return true;
+        }
+
+        public void ForgetAll()
+        {
+            ForgetAllInternal(GraphRoot, new List<SkillNode>());
+        }
+
+        private void ForgetAllInternal(SkillNode source, List<SkillNode> visited)
+        {
+            visited.Add(source);
+            if (source != GraphRoot && source.Earned)
+            {
+                source.SetEarned(false);
+            }
+            foreach (SkillNode node in source.Nodes)
+            {
+                if (false == visited.Contains(node))
+                {
+                    ForgetAllInternal(node, visited);
+                }
             }
         }
 
@@ -46,14 +86,22 @@ namespace SkillTree.Data
             return CanEarn(node);
         }
 
-        private bool CanEarn(SkillNode node)
+        public bool CanEarn(SkillNode node)
         {
             return CanReachFrom(GraphRoot, node, new List<SkillNode>(), n => n.Earned);
         }
 
         public bool CanForget(Guid skillId)
         {
-            SkillNode node = Get(skillId);
+            return CanForget(Get(skillId));
+        }
+
+        public bool CanForget(SkillNode node)
+        {
+            if (node == GraphRoot)
+            {
+                return false;
+            }
             return CanReachFrom(node, GraphRoot, new List<SkillNode>(), n => n.Earned && n != node);
         }
 
@@ -80,6 +128,19 @@ namespace SkillTree.Data
                 }
             }
             return false;
+        }
+
+        private void OnSkillStateChanged(object sender, SkillNodeStateChangedArgs e)
+        {
+            SkillStateChanged?.Invoke(this, e);
+        }
+
+        public void Dispose()
+        {
+            foreach (SkillNode skillNode in _nodes)
+            {
+                skillNode.StateChanged -= OnSkillStateChanged;
+            }
         }
     }
 }

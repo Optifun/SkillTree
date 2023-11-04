@@ -1,5 +1,7 @@
 ﻿using System;
 using SkillTree.Data;
+using SkillTree.Data.Events;
+using SkillTree.Settings;
 
 namespace SkillTree.UI.Screens
 {
@@ -7,11 +9,14 @@ namespace SkillTree.UI.Screens
     {
         public event Action<Guid> SelectedSkillChanged;
         public Guid SelectedSkill { get; private set; }
-        private GameState _gameState;
+        private readonly GameState _gameState;
+        private readonly SkillGraphProgress _skillGraphProgress;
 
-        public SkillGraphModel(GameState gameState)
+        public SkillGraphModel(GameState gameState, SkillGraphProgress skillGraphProgress)
         {
+            _skillGraphProgress = skillGraphProgress;
             _gameState = gameState;
+            skillGraphProgress.SkillStateChanged += OnSkillStateChanged;
         }
 
         public void SetSelection(Guid id)
@@ -25,18 +30,50 @@ namespace SkillTree.UI.Screens
 
         public void EarnXPPoints()
         {
+            _gameState.Experience.Add(GameSettings.ExperienceGainAmount);
         }
 
         public void AcclaimSkill(Guid skillId)
         {
+            SkillNode skillNode = _skillGraphProgress.Get(skillId);
+            if (false == _skillGraphProgress.TryEarnSkill(skillId))
+            {
+                throw new InvalidOperationException($"Can't earn skill[{skillNode.Id}]");
+            }
         }
 
         public void ForgetSkill(Guid skillId)
         {
+            SkillNode skillNode = _skillGraphProgress.Get(skillId);
+            if (false == _skillGraphProgress.TryForgetSkill(skillId))
+            {
+                throw new InvalidOperationException($"Can't forget skill[{skillNode.Id}]");
+            }
         }
 
         public void ForgetAllSkills()
         {
+            _skillGraphProgress.ForgetAll();
+        }
+
+        public bool CanAcclaimSkill(SkillNode node)
+        {
+            SkillNode skillNode = node;
+            bool canEarn = _skillGraphProgress.CanEarn(skillNode);
+            bool enoughExperience = _gameState.Experience.ExperiencePoints >= skillNode.Data.EarnCost;
+            return canEarn && enoughExperience;
+        }
+
+        private void OnSkillStateChanged(object sender, SkillNodeStateChangedArgs e)
+        {
+            if (e.Earned)
+            {
+                _gameState.Experience.Add(-e.SkillNode.Data.EarnCost);
+            }
+            else
+            {
+                _gameState.Experience.Add(e.SkillNode.Data.EarnCost);
+            }
         }
     }
 }

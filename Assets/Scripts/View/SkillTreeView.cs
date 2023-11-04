@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SkillTree.Data;
+using SkillTree.Data.Events;
 using SkillTree.UI.Screens;
 using SkillTree.Utils;
 using UnityEngine;
@@ -35,7 +36,7 @@ namespace SkillTree.View
                 skillView.Clicked += OnSkillClicked;
                 CreateConnections(skill, connections);
                 _skillViews.Add(skillView);
-                skill.EarnedChanged += OnSkillEarnedChanged;
+                skill.StateChanged += OnSkillStateChanged;
             }
         }
 
@@ -66,11 +67,11 @@ namespace SkillTree.View
             _model.SetSelection(id);
         }
 
-        private void OnSkillEarnedChanged(object sender, bool value)
+        private void OnSkillStateChanged(object sender, SkillNodeStateChangedArgs e)
         {
-            SkillNode node = (SkillNode)sender;
+            SkillNode node = e.SkillNode;
             SkillView view = _skillViews.First(view => view.Id == node.Id);
-            view.SetState(value);
+            view.SetState(e.Earned);
         }
     }
 }
