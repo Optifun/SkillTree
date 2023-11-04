@@ -1,5 +1,5 @@
 ﻿using System;
-using Unity.VisualScripting;
+using SkillTree.Core;
 
 namespace SkillTree.UI.Core
 {
