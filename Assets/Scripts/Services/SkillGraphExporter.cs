@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SkillTree.StaticData.Skills;
 using UnityEditor;
 using UnityEngine;
@@ -8,22 +7,19 @@ namespace SkillTree.Services
 {
     public class SkillGraphExporter
     {
-        public void SaveGraph(SkillGraph graph, string path)
+        public void SaveGraph(SkillGraph graph, string projectPath)
         {
             TextAsset asset = new TextAsset(JsonConvert.SerializeObject(graph, Formatting.Indented));
-            if (File.Exists(path))
-            {
-                AssetDatabase.DeleteAsset(path);
-            }
-            AssetDatabase.CreateAsset(asset, path);
+            AssetDatabase.DeleteAsset(projectPath);
+            AssetDatabase.CreateAsset(asset, projectPath);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
 
-        public SkillGraph LoadGraph(string path)
+        public SkillGraph LoadGraph(string projectPath)
         {
-            string json = AssetDatabase.LoadAssetAtPath<TextAsset>(path).text;
+            string json = AssetDatabase.LoadAssetAtPath<TextAsset>(projectPath).text;
             SkillGraph skillGraph = JsonConvert.DeserializeObject<SkillGraph>(json);
             return skillGraph;
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using SkillTree.Services;
 using SkillTree.StaticData.Skills;
@@ -13,7 +14,7 @@ namespace SkillTree.SkillEditing
     [ExecuteInEditMode]
     public class SkillGraphEditor : MonoBehaviour
     {
-        public const string FileExtension = ".asset";
+        public const string FileExtension = "asset";
         public const string PathToData = "Assets/Configs/SkillTree/";
 
         public string TreeName;
@@ -42,21 +43,13 @@ namespace SkillTree.SkillEditing
         [ContextMenu(nameof(AddSkill))]
         public void AddSkill()
         {
-            SkillView skillView = Instantiate(SkillPrefab, _nodesContainer);
-            SkillDefinitionEditor editor = skillView.AddComponent<SkillDefinitionEditor>();
-            editor.Construct(skillView);
-            editor.Deleted += OnSkillNodeDeleted;
-            Skills.Add(editor);
+            ConstructSkillEditor();
         }
 
         [ContextMenu(nameof(AddConnection))]
         public void AddConnection()
         {
-            var connectionView = Instantiate(ConnectionPrefab, _connectionContainer);
-            SkillConnectionEditor editor = connectionView.AddComponent<SkillConnectionEditor>();
-            editor.Deleted += OnConnectionDeleted;
-            editor.Construct(connectionView);
-            Connections.Add(editor);
+            ConstructConnectionEditor();
         }
 
         [ContextMenu(nameof(Export))]
@@ -65,20 +58,62 @@ namespace SkillTree.SkillEditing
             SkillGraph graph = this.ToDTO();
             string path = EditorUtility.SaveFilePanel("Save file", PathToData, graph.Name, FileExtension);
 
-            _skillGraphExporter.SaveGraph(graph, path);
+            string relativePath = GetProjectRelativePath(path);
+            _skillGraphExporter.SaveGraph(graph, relativePath);
         }
 
-        [ContextMenu(nameof(Load))]
-        public void Load()
+        [ContextMenu(nameof(Import))]
+        public void Import()
         {
             string path = EditorUtility.OpenFilePanel("Choose file", "skills", FileExtension);
-            SkillGraph skillGraph = _skillGraphExporter.LoadGraph(path);
+            SkillGraph skillGraph = _skillGraphExporter.LoadGraph(GetProjectRelativePath(path));
             InitializeEditor(skillGraph);
+        }
+
+        [ContextMenu(nameof(ClearGraph))]
+        public void ClearGraph()
+        {
+            foreach (SkillDefinitionEditor editor in Skills)
+            {
+                editor.Deleted -= OnSkillNodeDeleted;
+                DestroyImmediate(editor.gameObject);
+            }
+            foreach (SkillConnectionEditor editor in Connections)
+            {
+                editor.Deleted -= OnConnectionDeleted;
+                DestroyImmediate(editor.gameObject);
+            }
+            BaseSkill = null;
+            Skills.Clear();
+            Connections.Clear();
         }
 
         private void InitializeEditor(SkillGraph skillGraph)
         {
+            ClearGraph();
+            foreach (SkillDefinition skill in skillGraph.Skills)
+            {
+                SkillDefinitionEditor skillEditor = ConstructSkillEditor();
+                skillEditor.SetId(skill.Id);
+                skillEditor.Name = skill.Name;
+                skillEditor.Cost = skill.EarnCost;
+                skillEditor.transform.localPosition = skill.Position.ToVector3().ConvertToUnityVector();
+                skillEditor.OnValidate();
+            }
+            foreach (SkillConnection connection in skillGraph.Connections)
+            {
+                var connectionEditor = ConstructConnectionEditor();
+                connectionEditor.Source = GetSkillEditor(connection.Source);
+                connectionEditor.Target = GetSkillEditor(connection.Target);
+                connectionEditor.Redraw();
+            }
             TreeName = skillGraph.Name;
+            BaseSkill = GetSkillEditor(skillGraph.BaseSkill);
+        }
+
+        private static string GetProjectRelativePath(string path)
+        {
+            return path.Substring(path.IndexOf("Assets", StringComparison.Ordinal));
         }
 
         private void Subscribe()
@@ -103,6 +138,31 @@ namespace SkillTree.SkillEditing
             {
                 connection.Deleted -= OnConnectionDeleted;
             }
+        }
+
+        private SkillDefinitionEditor GetSkillEditor(Guid skillId)
+        {
+            return Skills.Find(skill => skill.Id == skillId);
+        }
+
+        private SkillDefinitionEditor ConstructSkillEditor()
+        {
+            SkillView skillView = Instantiate(SkillPrefab, _nodesContainer);
+            SkillDefinitionEditor editor = skillView.AddComponent<SkillDefinitionEditor>();
+            editor.Construct(skillView);
+            editor.Deleted += OnSkillNodeDeleted;
+            Skills.Add(editor);
+            return editor;
+        }
+
+        private SkillConnectionEditor ConstructConnectionEditor()
+        {
+            SkillConnectionView connectionView = Instantiate(ConnectionPrefab, _connectionContainer);
+            SkillConnectionEditor editor = connectionView.AddComponent<SkillConnectionEditor>();
+            editor.Deleted += OnConnectionDeleted;
+            editor.Construct(connectionView);
+            Connections.Add(editor);
+            return editor;
         }
 
         private void OnConnectionDeleted(object sender, SkillConnectionEditor editor)

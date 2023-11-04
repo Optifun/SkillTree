@@ -12,11 +12,17 @@ namespace SkillTree.SkillEditing
         public Guid Id => Guid.Parse(_id);
         public string Name;
         [SerializeField] private string _id;
-        private SkillView _skillView;
+        [field: SerializeField] public int Cost { get; set; }
+        [SerializeField] private SkillView _skillView;
 
         public void Construct(SkillView skillView)
         {
             _skillView = skillView;
+        }
+
+        public void SetId(Guid id)
+        {
+            _id = id.ToString();
         }
 
         [ContextMenu(nameof(RegenerateId))]
@@ -41,10 +47,11 @@ namespace SkillTree.SkillEditing
             RegenerateId();
         }
 
-        private void OnValidate()
+        public void OnValidate()
         {
             gameObject.name = $"Skill [{Name}]";
             _skillView?.SetName(Name);
+            Cost = Math.Clamp(Cost, 0, int.MaxValue);
         }
     }
 }
