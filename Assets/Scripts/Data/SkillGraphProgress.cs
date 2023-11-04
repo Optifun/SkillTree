@@ -56,8 +56,8 @@ namespace SkillTree.Data
 
         public void ForgetAll()
         {
-            List<SkillNode> visited = new();
-            Stack<SkillNode> stack = new();
+            List<SkillNode> visited = new(); // can be pooled
+            Stack<SkillNode> stack = new();  // can be pooled
             stack.Push(GraphRoot);
 
             while (stack.TryPop(out SkillNode source))
@@ -95,7 +95,7 @@ namespace SkillTree.Data
             {
                 return false;
             }
-            return CanReachFrom(GraphRoot, node, n => n.Earned);
+            return CanReachFrom(node, GraphRoot, n => n.Earned);
         }
 
         public bool CanForget(Guid skillId)
@@ -109,11 +109,8 @@ namespace SkillTree.Data
             {
                 return false;
             }
-            if (node.Nodes.Contains(GraphRoot))
-            {
-                return true;
-            }
-            foreach (var peer in node.Nodes.Where(n => n.Earned))
+            IEnumerable<SkillNode> earnedPeers = node.Nodes.Where(n => n.Earned);
+            foreach (var peer in earnedPeers)
             {
                 if (false == CanReachFrom(peer, GraphRoot, n => n.Earned && n != node))
                 {
@@ -125,24 +122,20 @@ namespace SkillTree.Data
 
         private static bool CanReachFrom(SkillNode source, SkillNode destination, Func<SkillNode, bool> predicate)
         {
-            List<SkillNode> visited = new();
-            Stack<SkillNode> stack = new();
+            List<SkillNode> visited = new(); // can be pooled
+            Stack<SkillNode> stack = new();  // can be pooled
             stack.Push(source);
 
             while (stack.TryPop(out SkillNode node))
             {
                 visited.Add(node);
-                if (false == predicate(node))
-                {
-                    continue;
-                }
-                if (node.Nodes.Contains(destination))
+                if (node == destination)
                 {
                     return true;
                 }
                 foreach (SkillNode peer in node.Nodes)
                 {
-                    if (false == visited.Contains(peer))
+                    if (false == visited.Contains(peer) && predicate(peer))
                     {
                         stack.Push(peer);
                     }

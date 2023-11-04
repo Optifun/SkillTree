@@ -15,6 +15,7 @@ namespace SkillTree.UI.Screens
         [SerializeField] private Button _acclaimButton;
         [SerializeField] private Button _forgetButton;
         [SerializeField] private Button _forgetAllButton;
+        private Guid _lastSelectedId;
 
         protected override void OnScreenShown()
         {
@@ -23,7 +24,8 @@ namespace SkillTree.UI.Screens
             _forgetButton.onClick.AddListener(Presenter.ForgetSelectedSkill);
             _forgetAllButton.onClick.AddListener(Presenter.ForgetAllSkills);
             Presenter.SelectedSkillChanged += OnSelectedSkillChanged;
-            Presenter.ExperienceChanged += OnExperienceChanged; 
+            Presenter.ExperienceChanged += OnExperienceChanged;
+            RedrawButtons(_lastSelectedId);
         }
 
         protected override void OnScreenHidden()
@@ -38,15 +40,29 @@ namespace SkillTree.UI.Screens
 
         private void OnSelectedSkillChanged(Guid skillId)
         {
-            ISkill skill = Presenter.GetSkill(skillId);
-            _skillCostText.text = skill.Data.EarnCost.ToString();
-            _acclaimButton.interactable = Presenter.CanAcclaimSkill(skillId);
-            _forgetButton.interactable = Presenter.CanForgetSkill(skillId);
+            _lastSelectedId = skillId;
+            RedrawButtons(skillId);
         }
 
         private void OnExperienceChanged(int experiencePoints)
         {
             _experiencePointsText.text = experiencePoints.ToString();
+            RedrawButtons(_lastSelectedId);
+        }
+
+        private void RedrawButtons(Guid skillId)
+        {
+            if (skillId == default)
+            {
+                _skillCostText.text = string.Empty;
+                _acclaimButton.interactable = false;
+                _forgetButton.interactable = false;
+                return;
+            }
+            ISkill skill = Presenter.GetSkill(skillId);
+            _skillCostText.text = skill.Data.EarnCost.ToString();
+            _acclaimButton.interactable = Presenter.CanAcclaimSkill(skillId);
+            _forgetButton.interactable = Presenter.CanForgetSkill(skillId);
         }
     }
 }
