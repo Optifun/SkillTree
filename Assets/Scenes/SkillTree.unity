@@ -167,7 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 102bae9adc9344699f519fa14f340d2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _skillTreeAsset: {fileID: 4900000, guid: a10702d684b977f42b5b77dc87cf2fd5, type: 2}
+  _skillTreeAsset: {fileID: 4900000, guid: 9cf7289601f20a544a91b8da4f6674c2, type: 2}
   _skillTreeViewPrefab: {fileID: 6925291979660816901, guid: 920a36dcd0fc09f48880e75fc3122136, type: 3}
   _rootCanvas: {fileID: 1936374469}
   _skillGraphScreenPrefab: {fileID: 7151307321062919436, guid: f2f0a28a110440247acb7e316999bf07, type: 3}
