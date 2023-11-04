@@ -22,21 +22,15 @@ namespace SkillTree.Utils
 
         public static SkillConnection ToDTO(this SkillConnectionEditor editor)
         {
-            return new SkillConnection()
-            {
-                    Source = editor.Source.Id,
-                    Target = editor.Target.Id
-            };
+            return new SkillConnection(editor.Source.Id, editor.Target.Id);
         }
 
         public static SkillDefinition ToDTO(this SkillDefinitionEditor skill)
         {
-            return new SkillDefinition()
-            {
-                    Id = skill.Id,
-                    Name = skill.Name,
-                    Position = skill.transform.localPosition.ToVector().ToVector2()
-            };
+            return new SkillDefinition(skill.Id,
+                    skill.Name,
+                    skill.transform.localPosition.ToVector().ToVector2(),
+                    skill.Cost);
         }
     }
 }

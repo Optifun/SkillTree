@@ -8,7 +8,6 @@ namespace SkillTree.UI.Screens
     public class SkillGraphModel
     {
         public event Action<Guid> SelectedSkillChanged;
-        public event Action<int> ExperienceChanged;
         public Guid SelectedSkill { get; private set; }
         public ExperienceState ExperienceState => _gameState.Experience;
         private readonly GameState _gameState;

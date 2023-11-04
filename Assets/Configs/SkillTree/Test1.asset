@@ -10,20 +10,22 @@ TextAsset:
   m_Script: "{\r\n  \"Name\": \"Test1\",\r\n  \"BaseSkill\": \"56688517-c134-4d7b-852d-9416fabaf88a\",\r\n 
     \"Skills\": [\r\n    {\r\n      \"Id\": \"56688517-c134-4d7b-852d-9416fabaf88a\",\r\n     
     \"Name\": \"1\",\r\n      \"Position\": {\r\n        \"X\": 0.0,\r\n        \"Y\":
-    0.0\r\n      }\r\n    },\r\n    {\r\n      \"Id\": \"f2fabe32-8076-4774-ad9c-2b109d421437\",\r\n     
-    \"Name\": \"2\",\r\n      \"Position\": {\r\n        \"X\": 2.344,\r\n       
-    \"Y\": 0.401\r\n      }\r\n    },\r\n    {\r\n      \"Id\": \"7874a8ea-cad4-4cbf-b5d4-1937ede6cf17\",\r\n     
+    0.0\r\n      },\r\n      \"EarnCost\": 0\r\n    },\r\n    {\r\n      \"Id\":
+    \"f2fabe32-8076-4774-ad9c-2b109d421437\",\r\n      \"Name\": \"2\",\r\n     
+    \"Position\": {\r\n        \"X\": 2.344,\r\n        \"Y\": 0.401\r\n      },\r\n     
+    \"EarnCost\": 4\r\n    },\r\n    {\r\n      \"Id\": \"7874a8ea-cad4-4cbf-b5d4-1937ede6cf17\",\r\n     
     \"Name\": \"3\",\r\n      \"Position\": {\r\n        \"X\": 0.555,\r\n       
-    \"Y\": -1.089\r\n      }\r\n    },\r\n    {\r\n      \"Id\": \"305152f0-5a3e-4f1c-b818-0168f361e9fc\",\r\n     
-    \"Name\": \"4\",\r\n      \"Position\": {\r\n        \"X\": -1.229,\r\n       
-    \"Y\": -1.664\r\n      }\r\n    },\r\n    {\r\n      \"Id\": \"e0067040-6f73-4f07-883f-a18d343eca0d\",\r\n     
+    \"Y\": -1.089\r\n      },\r\n      \"EarnCost\": 4\r\n    },\r\n    {\r\n     
+    \"Id\": \"305152f0-5a3e-4f1c-b818-0168f361e9fc\",\r\n      \"Name\": \"4\",\r\n     
+    \"Position\": {\r\n        \"X\": -1.229,\r\n        \"Y\": -1.664\r\n      },\r\n     
+    \"EarnCost\": 7\r\n    },\r\n    {\r\n      \"Id\": \"e0067040-6f73-4f07-883f-a18d343eca0d\",\r\n     
     \"Name\": \"5\",\r\n      \"Position\": {\r\n        \"X\": 0.962,\r\n       
-    \"Y\": -2.465\r\n      }\r\n    }\r\n  ],\r\n  \"Connections\": [\r\n    {\r\n     
-    \"Source\": \"56688517-c134-4d7b-852d-9416fabaf88a\",\r\n      \"Target\": \"f2fabe32-8076-4774-ad9c-2b109d421437\"\r\n   
+    \"Y\": -2.465\r\n      },\r\n      \"EarnCost\": 7\r\n    }\r\n  ],\r\n  \"Connections\":
+    [\r\n    {\r\n      \"Source\": \"56688517-c134-4d7b-852d-9416fabaf88a\",\r\n     
+    \"Target\": \"f2fabe32-8076-4774-ad9c-2b109d421437\"\r\n    },\r\n    {\r\n     
+    \"Source\": \"56688517-c134-4d7b-852d-9416fabaf88a\",\r\n      \"Target\": \"7874a8ea-cad4-4cbf-b5d4-1937ede6cf17\"\r\n   
     },\r\n    {\r\n      \"Source\": \"56688517-c134-4d7b-852d-9416fabaf88a\",\r\n     
-    \"Target\": \"7874a8ea-cad4-4cbf-b5d4-1937ede6cf17\"\r\n    },\r\n    {\r\n     
-    \"Source\": \"56688517-c134-4d7b-852d-9416fabaf88a\",\r\n      \"Target\": \"305152f0-5a3e-4f1c-b818-0168f361e9fc\"\r\n   
-    },\r\n    {\r\n      \"Source\": \"7874a8ea-cad4-4cbf-b5d4-1937ede6cf17\",\r\n     
-    \"Target\": \"e0067040-6f73-4f07-883f-a18d343eca0d\"\r\n    },\r\n    {\r\n     
-    \"Source\": \"305152f0-5a3e-4f1c-b818-0168f361e9fc\",\r\n      \"Target\": \"e0067040-6f73-4f07-883f-a18d343eca0d\"\r\n   
-    }\r\n  ]\r\n}"
+    \"Target\": \"305152f0-5a3e-4f1c-b818-0168f361e9fc\"\r\n    },\r\n    {\r\n     
+    \"Source\": \"7874a8ea-cad4-4cbf-b5d4-1937ede6cf17\",\r\n      \"Target\": \"e0067040-6f73-4f07-883f-a18d343eca0d\"\r\n   
+    },\r\n    {\r\n      \"Source\": \"305152f0-5a3e-4f1c-b818-0168f361e9fc\",\r\n     
+    \"Target\": \"e0067040-6f73-4f07-883f-a18d343eca0d\"\r\n    }\r\n  ]\r\n}"
