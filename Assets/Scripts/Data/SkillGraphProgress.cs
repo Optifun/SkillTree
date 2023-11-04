@@ -56,21 +56,24 @@ namespace SkillTree.Data
 
         public void ForgetAll()
         {
-            ForgetAllInternal(GraphRoot, new List<SkillNode>());
-        }
+            List<SkillNode> visited = new();
+            Stack<SkillNode> stack = new();
+            stack.Push(GraphRoot);
 
-        private void ForgetAllInternal(SkillNode source, List<SkillNode> visited)
-        {
-            visited.Add(source);
-            if (source != GraphRoot && source.Earned)
+            while (stack.TryPop(out SkillNode source))
             {
-                source.SetEarned(false);
-            }
-            foreach (SkillNode node in source.Nodes)
-            {
-                if (false == visited.Contains(node))
+                visited.Add(source);
+                if (source != GraphRoot && source.Earned)
                 {
-                    ForgetAllInternal(node, visited);
+                    source.SetEarned(false);
+                }
+
+                foreach (SkillNode node in source.Nodes)
+                {
+                    if (false == visited.Contains(node))
+                    {
+                        stack.Push(node);
+                    }
                 }
             }
         }
@@ -88,7 +91,11 @@ namespace SkillTree.Data
 
         public bool CanEarn(SkillNode node)
         {
-            return CanReachFrom(GraphRoot, node, new List<SkillNode>(), n => n.Earned);
+            if (node == GraphRoot || node.Earned)
+            {
+                return false;
+            }
+            return CanReachFrom(GraphRoot, node, n => n.Earned);
         }
 
         public bool CanForget(Guid skillId)
@@ -98,33 +105,47 @@ namespace SkillTree.Data
 
         public bool CanForget(SkillNode node)
         {
-            if (node == GraphRoot)
+            if (node == GraphRoot || false == node.Earned)
             {
                 return false;
             }
-            return CanReachFrom(node, GraphRoot, new List<SkillNode>(), n => n.Earned && n != node);
-        }
-
-        private static bool CanReachFrom(SkillNode source, SkillNode destination, List<SkillNode> nodes, Func<SkillNode, bool> predicate)
-        {
-            if (nodes.Contains(source))
-            {
-                return false;
-            }
-            nodes.Add(source);
-            if (false == predicate(source))
-            {
-                return false;
-            }
-            if (source.Nodes.Contains(destination))
+            if (node.Nodes.Contains(GraphRoot))
             {
                 return true;
             }
-            foreach (SkillNode node in source.Nodes)
+            foreach (var peer in node.Nodes.Where(n => n.Earned))
             {
-                if (CanReachFrom(node, destination, nodes, predicate))
+                if (false == CanReachFrom(peer, GraphRoot, n => n.Earned && n != node))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private static bool CanReachFrom(SkillNode source, SkillNode destination, Func<SkillNode, bool> predicate)
+        {
+            List<SkillNode> visited = new();
+            Stack<SkillNode> stack = new();
+            stack.Push(source);
+
+            while (stack.TryPop(out SkillNode node))
+            {
+                visited.Add(node);
+                if (false == predicate(node))
+                {
+                    continue;
+                }
+                if (node.Nodes.Contains(destination))
                 {
                     return true;
+                }
+                foreach (SkillNode peer in node.Nodes)
+                {
+                    if (false == visited.Contains(peer))
+                    {
+                        stack.Push(peer);
+                    }
                 }
             }
             return false;
