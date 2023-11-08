@@ -3,7 +3,7 @@ using SkillTree.StaticData.Skills;
 using UnityEditor;
 using UnityEngine;
 
-namespace SkillTree.Services
+namespace SkillTree.Services.Editor
 {
     public class SkillGraphExporter
     {

@@ -1,9 +1,7 @@
 {
     "name": "SkillTree.Services",
     "rootNamespace": "SkillTree",
-    "references": [
-        "GUID:9d174517ab7a5f64ca65e8cb88a27ef5"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -1,13 +1,8 @@
 {
-    "name": "SkillTree.SkillEditing",
+    "name": "SkillTree.Services.Editor",
     "rootNamespace": "SkillTree",
     "references": [
-        "GUID:21b0c8d1703a94250bfac916590cea4f",
-        "GUID:eb6b12f7d4c950a40971838ca33107c0",
-        "GUID:8a3a4873d4a81c748ba4efd8392550c0",
-        "GUID:9d174517ab7a5f64ca65e8cb88a27ef5",
-        "GUID:44e8137429c0f304aadf23b2b81c84c5",
-        "GUID:f1a6af819d0a786469c7cd4865e36606"
+        "GUID:9d174517ab7a5f64ca65e8cb88a27ef5"
     ],
     "includePlatforms": [
         "Editor"

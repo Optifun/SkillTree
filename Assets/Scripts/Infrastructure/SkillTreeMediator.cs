@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using SkillTree.Data;
-using SkillTree.Services;
 using SkillTree.StaticData.Skills;
 using SkillTree.UI.Screens;
 using SkillTree.View;
@@ -18,14 +17,12 @@ namespace SkillTree.Infrastructure
         private SkillTreeView _skillTreeView;
         private SkillGraphScreen _skillGraphScreen;
 
-        private SkillGraphExporter _skillGraphExporter;
         private SkillGraphProgress _skillGraphProgress;
         private SkillGraphModel _skillGraphModel;
         private GameState _gameState;
 
         private void Awake()
         {
-            _skillGraphExporter = new SkillGraphExporter();
             SkillGraph skillGraph = JsonConvert.DeserializeObject<SkillGraph>(_skillTreeAsset.text);
             _skillGraphProgress = new SkillGraphProgress(skillGraph);
             _gameState = new GameState();
