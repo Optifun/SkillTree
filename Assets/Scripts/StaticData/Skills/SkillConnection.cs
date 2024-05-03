@@ -4,8 +4,8 @@ namespace SkillTree.StaticData.Skills
 {
     public class SkillConnection
     {
-        public readonly Guid Source;
-        public readonly Guid Target;
+        public Guid Source { get; private set; }
+        public Guid Target { get; private set; }
 
         public SkillConnection(Guid source, Guid target)
         {
