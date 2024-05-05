@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using R3;
 using SkillTree.Data;
-using SkillTree.Data.Events;
 using SkillTree.Utils;
 using UnityEngine;
 
@@ -10,13 +10,15 @@ namespace SkillTree.View
 {
     public class SkillTreeView : MonoBehaviour
     {
-        public event EventHandler<Guid> SkillClicked;
+        public readonly ReactiveCommand<Guid> SkillClicked = new();
+
         [SerializeField] private SkillView _viewPrefab;
         [SerializeField] private SkillConnectionView _connectionPrefab;
 
         private readonly List<SkillView> _skillViews = new();
         private readonly List<SkillConnectionView> _skillConnectionViews = new();
-        private Guid _lastSelectedSkill;
+        private Guid? _lastSelectedSkill;
+        private CompositeDisposable _subscriptions = new();
 
         public void DisplayTree(IEnumerable<ISkill> nodes)
         {
@@ -27,12 +29,12 @@ namespace SkillTree.View
                 SkillView skillView = Instantiate(_viewPrefab, position, Quaternion.identity, transform);
                 skillView.SetId(skill.Data.Id);
                 skillView.SetName(skill.Data.Name);
-                skillView.SetEarned(skill.Earned);
+                skillView.SetEarned(skill.IsEarned.CurrentValue);
                 skillView.SetSelected(false);
                 skillView.Clicked += OnSkillClicked;
                 CreateConnections(skill, connections);
                 _skillViews.Add(skillView);
-                skill.StateChanged += OnSkillStateChanged;
+                _subscriptions.Add(skill.IsEarned.Subscribe(skill, OnSkillStateChanged));
             }
         }
 
@@ -60,27 +62,26 @@ namespace SkillTree.View
 
         private void OnSkillClicked(object sender, Guid id)
         {
-            SkillClicked?.Invoke(this, id);
+            SkillClicked.Execute(id);
         }
 
-        private void OnSkillStateChanged(object sender, SkillNodeStateChangedArgs e)
+        private void OnSkillStateChanged(bool isEarned, ISkill skill)
         {
-            ISkill node = e.Skill;
-            Guid skillId = node.Id;
-            SkillView view = GetSkillView(skillId);
-            view.SetEarned(e.Earned);
+            SkillView view = GetSkillView(skill.Id);
+            view.SetEarned(isEarned);
         }
 
-        public void SelectSkill(Guid skillId)
+        public void SelectSkill(Guid? skillId)
         {
-            if (_lastSelectedSkill != default)
+            if (_lastSelectedSkill != null)
             {
-                GetSkillView(_lastSelectedSkill).SetSelected(false);
+                GetSkillView(_lastSelectedSkill.Value).SetSelected(false);
             }
-            if (_lastSelectedSkill != skillId)
+
+            if (skillId is Guid newValue && _lastSelectedSkill != newValue)
             {
-                _lastSelectedSkill = skillId;
-                GetSkillView(_lastSelectedSkill).SetSelected(true);
+                _lastSelectedSkill = newValue;
+                GetSkillView(newValue).SetSelected(true);
             }
         }
 

@@ -1,26 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using SkillTree.Data.Events;
+using R3;
 using SkillTree.StaticData.Skills;
 
 namespace SkillTree.Data
 {
-    public class SkillGraphProgress : IDisposable
+    public class SkillGraphProgress
     {
-        public event EventHandler<SkillNodeStateChangedArgs> SkillStateChanged;
+        public Observable<SkillNode> SkillStateChanged => _skillStateChanged;
         public IReadOnlyList<SkillNode> Nodes => _nodes;
         public readonly SkillNode GraphRoot;
+
+        private readonly ReactiveCommand<SkillNode> _skillStateChanged = new();
         private readonly SkillNode[] _nodes;
+        private CompositeDisposable _subscriptions = new();
 
         public SkillGraphProgress(SkillGraph skillGraph)
         {
             _nodes = skillGraph.Skills.Select(s =>
             {
                 SkillNode skillNode = new SkillNode(s);
-                skillNode.StateChanged += OnSkillStateChanged;
+                _subscriptions.Add(skillNode.IsEarned.Subscribe(skillNode, OnSkillStateChanged));
                 return skillNode;
             }).ToArray();
+
             foreach (SkillConnection connection in skillGraph.Connections)
             {
                 SkillNode source = Get(connection.Source);
@@ -28,6 +32,7 @@ namespace SkillTree.Data
                 source.AddConnection(target);
                 target.AddConnection(source);
             }
+
             GraphRoot = Get(skillGraph.BaseSkill);
             GraphRoot.SetEarned(true);
         }
@@ -63,7 +68,7 @@ namespace SkillTree.Data
             while (stack.TryPop(out ISkill source))
             {
                 visited.Add(source);
-                if (source != GraphRoot && source.Earned && source is SkillNode skillNode)
+                if (source != GraphRoot && source.IsEarned.CurrentValue && source is SkillNode skillNode)
                 {
                     skillNode.SetEarned(false);
                 }
@@ -91,11 +96,11 @@ namespace SkillTree.Data
 
         public bool CanEarn(SkillNode node)
         {
-            if (node == GraphRoot || node.Earned)
+            if (node == GraphRoot || node.IsEarned.CurrentValue)
             {
                 return false;
             }
-            return CanReachFrom(node, GraphRoot, n => n.Earned);
+            return CanReachFrom(node, GraphRoot, n => n.IsEarned.CurrentValue);
         }
 
         public bool CanForget(Guid skillId)
@@ -105,14 +110,14 @@ namespace SkillTree.Data
 
         public bool CanForget(ISkill node)
         {
-            if (node == GraphRoot || false == node.Earned)
+            if (node == GraphRoot || false == node.IsEarned.CurrentValue)
             {
                 return false;
             }
-            IEnumerable<ISkill> earnedPeers = node.Nodes.Where(n => n.Earned);
+            IEnumerable<ISkill> earnedPeers = node.Nodes.Where(n => n.IsEarned.CurrentValue);
             foreach (var peer in earnedPeers)
             {
-                if (false == CanReachFrom(peer, GraphRoot, n => n.Earned && n != node))
+                if (false == CanReachFrom(peer, GraphRoot, n => n.IsEarned.CurrentValue && n != node))
                 {
                     return false;
                 }
@@ -144,17 +149,9 @@ namespace SkillTree.Data
             return false;
         }
 
-        private void OnSkillStateChanged(object sender, SkillNodeStateChangedArgs e)
+        private void OnSkillStateChanged(bool e, SkillNode sender)
         {
-            SkillStateChanged?.Invoke(this, e);
-        }
-
-        public void Dispose()
-        {
-            foreach (SkillNode skillNode in _nodes)
-            {
-                skillNode.StateChanged -= OnSkillStateChanged;
-            }
+            _skillStateChanged.Execute(sender);
         }
     }
 }

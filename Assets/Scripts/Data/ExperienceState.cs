@@ -1,21 +1,26 @@
-﻿using System;
+﻿using R3;
 
 namespace SkillTree.Data
 {
     public class ExperienceState
     {
-        public event Action<int> ExperienceChanged;
-        public int ExperiencePoints { get; private set; }
+        public ReadOnlyReactiveProperty<int> ExperiencePoints => _experiencePoints;
 
-        public void Set(int value)
-        {
-            ExperiencePoints = value;
-            ExperienceChanged?.Invoke(ExperiencePoints);
-        }
+        private readonly ReactiveProperty<int> _experiencePoints = new();
 
         public void Add(int value)
         {
-            Set(ExperiencePoints + value);
+            Set(_experiencePoints.Value + value);
+        }
+
+        public void Decrease(int value)
+        {
+            Add(-value);
+        }
+
+        public void Set(int value)
+        {
+            _experiencePoints.Value = value;
         }
     }
 }

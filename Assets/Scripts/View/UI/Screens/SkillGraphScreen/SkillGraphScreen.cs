@@ -1,4 +1,6 @@
 ﻿using System;
+using JetBrains.Annotations;
+using SkillTree.Data;
 using SkillTree.UI.Core;
 using SkillTree.View;
 using TMPro;
@@ -15,7 +17,7 @@ namespace SkillTree.UI.Screens
         [SerializeField] private Button _acclaimButton;
         [SerializeField] private Button _forgetButton;
         [SerializeField] private Button _forgetAllButton;
-        private Guid _lastSelectedId;
+
         private SkillTreeView _skillTreeView;
 
         public void Initialize(SkillTreeView skillTreeView)
@@ -26,66 +28,55 @@ namespace SkillTree.UI.Screens
         protected override void OnScreenShown()
         {
             Subscribe();
-            RedrawButtons(_lastSelectedId);
+            RedrawButtons();
             _skillTreeView.DisplayTree(Presenter.Skills);
-        }
-
-        protected override void OnScreenHidden()
-        {
-            Unsubscribe();
         }
 
         private void Subscribe()
         {
-            _earnButton.onClick.AddListener(Presenter.EarnXPPoints);
-            _acclaimButton.onClick.AddListener(Presenter.AcclaimSelectedSkill);
-            _forgetButton.onClick.AddListener(Presenter.ForgetSelectedSkill);
-            _forgetAllButton.onClick.AddListener(Presenter.ForgetAllSkills);
-            Presenter.SelectedSkillChanged += OnSelectedSkillChanged;
-            Presenter.ExperienceChanged += OnExperienceChanged;
-            _skillTreeView.SkillClicked += OnSkillClicked;
+            Bind(_earnButton.onClick, Presenter.EarnXPPoints);
+            Bind(_acclaimButton.onClick, Presenter.AcclaimSelectedSkill);
+            Bind(_forgetButton.onClick, Presenter.ForgetSelectedSkill);
+            Bind(_forgetAllButton.onClick, Presenter.ForgetAllSkills);
+            Bind(_skillTreeView.SkillClicked, OnSkillClicked);
+
+            Bind(Presenter.SelectedSkill, OnSelectedSkillChanged);
+            Bind(Presenter.ExperiencePoints, OnExperienceChanged);
         }
 
-        private void Unsubscribe()
-        {
-            _earnButton.onClick.RemoveListener(Presenter.EarnXPPoints);
-            _acclaimButton.onClick.RemoveListener(Presenter.AcclaimSelectedSkill);
-            _forgetButton.onClick.RemoveListener(Presenter.ForgetSelectedSkill);
-            _forgetAllButton.onClick.RemoveListener(Presenter.ForgetAllSkills);
-            Presenter.SelectedSkillChanged -= OnSelectedSkillChanged;
-            Presenter.ExperienceChanged -= OnExperienceChanged;
-        }
-
-        private void OnSkillClicked(object sender, Guid skillId)
+        private void OnSkillClicked(Guid skillId)
         {
             Presenter.SelectSkill(skillId);
         }
 
-        private void OnSelectedSkillChanged(Guid skillId)
+        private void OnSelectedSkillChanged([CanBeNull] ISkill skill)
         {
-            RedrawButtons(skillId);
-            _skillTreeView.SelectSkill(skillId);
+            RedrawButtons();
+            _skillTreeView.SelectSkill(skill?.Id);
         }
 
         private void OnExperienceChanged(int experiencePoints)
         {
             _experiencePointsText.text = experiencePoints.ToString();
-            RedrawButtons(Presenter.SelectedSkill);
+            RedrawButtons();
         }
 
-        private void RedrawButtons(Guid skillId)
+        private void RedrawButtons()
         {
-            if (skillId == default)
+            Guid selectedId = Presenter.SelectedSkillId;
+            if (selectedId == default)
             {
                 _skillCostText.text = string.Empty;
                 _acclaimButton.interactable = false;
                 _forgetButton.interactable = false;
                 return;
             }
-            SkillNodePresenter skill = Presenter.GetSkill(skillId);
-            _skillCostText.text = skill.Data.EarnCost.ToString();
-            _acclaimButton.interactable = Presenter.CanAcclaimSkill(skillId);
-            _forgetButton.interactable = Presenter.CanForgetSkill(skillId);
+
+            var earnCost = Presenter.SelectedSkill.CurrentValue?.Data.EarnCost;
+            _skillCostText.text = earnCost?.ToString() ?? string.Empty;
+            
+            _acclaimButton.interactable = Presenter.CanAcclaimSkill(selectedId);
+            _forgetButton.interactable = Presenter.CanForgetSkill(selectedId);
         }
     }
 }

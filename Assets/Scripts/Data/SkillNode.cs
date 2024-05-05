@@ -1,31 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using SkillTree.Data.Events;
+using R3;
 using SkillTree.StaticData.Skills;
 
 namespace SkillTree.Data
 {
     public class SkillNode : ISkill
     {
-        public event EventHandler<SkillNodeStateChangedArgs> StateChanged;
         public Guid Id => Data.Id;
         public IEnumerable<ISkill> Nodes => _nodes;
-        public bool Earned { get; private set; }
         public SkillDefinition Data { get; }
+        public ReadOnlyReactiveProperty<bool> IsEarned => _isEarned;
+
+        private readonly ReactiveProperty<bool> _isEarned;
         private readonly List<SkillNode> _nodes = new();
 
         public SkillNode(SkillDefinition data, bool earned = false)
         {
-            Earned = earned;
             Data = data;
+            _isEarned = new ReactiveProperty<bool>(earned);
         }
 
         public void SetEarned(bool value)
         {
-            if (Earned != value)
+            if (_isEarned.Value != value)
             {
-                Earned = value;
-                InvokeStateChanged();
+                _isEarned.Value = value;
             }
         }
 
@@ -37,11 +37,6 @@ namespace SkillTree.Data
         public void RemoveConnection(SkillNode node)
         {
             _nodes.Remove(node);
-        }
-
-        private void InvokeStateChanged()
-        {
-            StateChanged?.Invoke(this, new SkillNodeStateChangedArgs() {Skill = this, Earned = Earned});
         }
     }
 }

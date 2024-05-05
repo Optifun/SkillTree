@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using R3;
 using SkillTree.Data;
 using SkillTree.Settings;
 using SkillTree.UI.Core;
@@ -9,34 +10,21 @@ namespace SkillTree.UI.Screens
 {
     public class SkillGraphPresenter : BasePresenter
     {
-        public event Action<Guid> SelectedSkillChanged;
-        public event Action<int> ExperienceChanged;
-
         public IReadOnlyList<SkillNodePresenter> Skills => _skills;
-        public int ExperiencePoints => _gameState.Experience.ExperiencePoints;
-        public Guid SelectedSkill { get; private set; }
+        public ReadOnlyReactiveProperty<int> ExperiencePoints => _gameState.Experience.ExperiencePoints;
+        public ReadOnlyReactiveProperty<SkillNodePresenter?> SelectedSkill => _selectedSkill;
+        public Guid SelectedSkillId => _selectedSkill.Value?.Id ?? Guid.Empty;
 
         private readonly List<SkillNodePresenter> _skills;
         private readonly GameState _gameState;
         private readonly SkillGraphProgress _skillGraphProgress;
+        private readonly ReactiveProperty<SkillNodePresenter?> _selectedSkill = new();
 
         public SkillGraphPresenter(GameState gameState, SkillGraphProgress skillGraphProgress)
         {
             _skillGraphProgress = skillGraphProgress;
             _gameState = gameState;
             _skills = _skillGraphProgress.Nodes.Select(s => new SkillNodePresenter(s)).ToList();
-        }
-
-        public override void Initialize()
-        {
-            base.Initialize();
-            Subscribe();
-        }
-
-        protected override void OnDispose()
-        {
-            base.OnDispose();
-            Unsubscribe();
         }
 
         public void EarnXPPoints()
@@ -46,28 +34,29 @@ namespace SkillTree.UI.Screens
 
         public void AcclaimSelectedSkill()
         {
-            if (false == _skillGraphProgress.TryEarnSkill(SelectedSkill))
+            if (false == _skillGraphProgress.TryEarnSkill(SelectedSkillId))
             {
-                throw new InvalidOperationException($"Can't earn skill[{SelectedSkill}]");
+                throw new InvalidOperationException($"Can't earn skill[{SelectedSkillId}]");
             }
+
+            var skill = GetSkill(SelectedSkillId);
+            _gameState.Experience.Decrease(skill.Data.EarnCost);
         }
 
         public void ForgetSelectedSkill()
         {
-            if (false == _skillGraphProgress.TryForgetSkill(SelectedSkill))
+            if (false == _skillGraphProgress.TryForgetSkill(SelectedSkillId))
             {
-                throw new InvalidOperationException($"Can't forget skill[{SelectedSkill}]");
+                throw new InvalidOperationException($"Can't forget skill[{SelectedSkillId}]");
             }
+
+            var skill = GetSkill(SelectedSkillId);
+            _gameState.Experience.Add(skill.Data.EarnCost);
         }
 
         public void ForgetAllSkills()
         {
             _skillGraphProgress.ForgetAll();
-        }
-
-        public SkillNodePresenter GetSkill(Guid skillId)
-        {
-            return _skills.First(s => s.Id == skillId);
         }
 
         public bool CanAcclaimSkill(Guid skillId)
@@ -79,7 +68,7 @@ namespace SkillTree.UI.Screens
         {
             SkillNode skillNode = node;
             bool canEarn = _skillGraphProgress.CanEarn(skillNode);
-            bool enoughExperience = _gameState.Experience.ExperiencePoints >= skillNode.Data.EarnCost;
+            bool enoughExperience = _gameState.Experience.ExperiencePoints.CurrentValue >= skillNode.Data.EarnCost;
             return canEarn && enoughExperience;
         }
 
@@ -90,26 +79,12 @@ namespace SkillTree.UI.Screens
 
         public void SelectSkill(Guid skillId)
         {
-            if (SelectedSkill != skillId)
-            {
-                SelectedSkill = skillId;
-                SelectedSkillChanged?.Invoke(skillId);
-            }
+            _selectedSkill.Value = GetSkill(skillId);
         }
 
-        private void Subscribe()
+        private SkillNodePresenter GetSkill(Guid skillId)
         {
-            _gameState.Experience.ExperienceChanged += OnExperienceChanged;
-        }
-
-        private void Unsubscribe()
-        {
-            _gameState.Experience.ExperienceChanged -= OnExperienceChanged;
-        }
-
-        private void OnExperienceChanged(int xp)
-        {
-            ExperienceChanged?.Invoke(xp);
+            return _skills.First(s => s.Id == skillId);
         }
     }
 }

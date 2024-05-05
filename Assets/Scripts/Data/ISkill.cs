@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using SkillTree.Data.Events;
+using R3;
 using SkillTree.StaticData.Skills;
 
 namespace SkillTree.Data
 {
     public interface ISkill
     {
-        event EventHandler<SkillNodeStateChangedArgs> StateChanged;
         Guid Id { get; }
-        bool Earned { get; }
+        ReadOnlyReactiveProperty<bool> IsEarned { get; }
         SkillDefinition Data { get; }
         IEnumerable<ISkill> Nodes { get; }
     }
