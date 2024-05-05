@@ -1,5 +1,4 @@
 ﻿using System;
-using SkillTree.Data;
 using SkillTree.UI.Core;
 using SkillTree.View;
 using TMPro;
@@ -83,7 +82,7 @@ namespace SkillTree.UI.Screens
                 _forgetButton.interactable = false;
                 return;
             }
-            ISkill skill = Presenter.GetSkill(skillId);
+            SkillNodePresenter skill = Presenter.GetSkill(skillId);
             _skillCostText.text = skill.Data.EarnCost.ToString();
             _acclaimButton.interactable = Presenter.CanAcclaimSkill(skillId);
             _forgetButton.interactable = Presenter.CanForgetSkill(skillId);

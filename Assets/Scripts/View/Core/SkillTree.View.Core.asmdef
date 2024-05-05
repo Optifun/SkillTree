@@ -1,5 +1,5 @@
 {
-    "name": "SkillTree.UI.Core",
+    "name": "SkillTree.View.Core",
     "rootNamespace": "SkillTree",
     "references": [
         "GUID:a03b7b33f6f1331448074f2377dc27ef"

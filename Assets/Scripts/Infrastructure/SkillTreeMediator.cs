@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SkillTree.Data;
 using SkillTree.StaticData.Skills;
 using SkillTree.UI.Screens;
@@ -20,27 +18,36 @@ namespace SkillTree.Infrastructure
         private SkillGraphScreen _skillGraphScreen;
 
         private SkillGraphProgress _skillGraphProgress;
-        private SkillGraphModel _skillGraphModel;
         private GameState _gameState;
 
         private void Awake()
         {
-            SkillGraph skillGraph = JsonConvert.DeserializeObject<SkillGraph>(_skillTreeAsset.text);
-            _skillGraphProgress = new SkillGraphProgress(skillGraph);
-            _gameState = new GameState();
-            _skillGraphModel = new SkillGraphModel(_gameState, _skillGraphProgress);
+            InitModel();
 
-            _skillTreeView = Instantiate(_skillTreeViewPrefab, transform);
-            _skillGraphScreen = Instantiate(_skillGraphScreenPrefab, _rootCanvas.transform);
-            SkillGraphPresenter presenter = new SkillGraphPresenter(_skillGraphModel);
-            presenter.Initialize();
-            _skillGraphScreen.Construct(presenter);
-            _skillGraphScreen.Initialize(_skillTreeView);
+            SkillGraphPresenter presenter = new SkillGraphPresenter(_gameState, _skillGraphProgress);
+
+            CreateViews(presenter);
         }
 
         private void Start()
         {
             _skillGraphScreen.ShowScreen();
+        }
+
+        private void InitModel()
+        {
+            SkillGraph skillGraph = JsonConvert.DeserializeObject<SkillGraph>(_skillTreeAsset.text);
+            _skillGraphProgress = new SkillGraphProgress(skillGraph);
+            _gameState = new GameState();
+        }
+
+        private void CreateViews(SkillGraphPresenter presenter)
+        {
+            _skillTreeView = Instantiate(_skillTreeViewPrefab, transform);
+            _skillGraphScreen = Instantiate(_skillGraphScreenPrefab, _rootCanvas.transform);
+            _skillGraphScreen.Construct(presenter);
+            presenter.Initialize();
+            _skillGraphScreen.Initialize(_skillTreeView);
         }
     }
 }

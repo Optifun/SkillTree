@@ -5,7 +5,6 @@
 
         public virtual void Initialize()
         {
-            
         }
 
         public void Dispose()
